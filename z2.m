@@ -1,47 +1,37 @@
-% Definicje
 A = 4;
 B = 1;
-K = tf(A, [B 1]);
-omega = [1,2,3,5,10,25];
+G1 = tf(A, [B 1]);
+omega = [1,2,3,5,10];
 t = 0:0.01:10;
 
-% Zmienne wynikowe
-ampli = [];
-phi = [];
 
-% Pętla obliczająca odpowiedzi układu dla różnych częstotliwości
 for omega0 = omega
-    u = sin(omega0 * t);
-    y = lsim(K, u, t);
-    
-    % Znajdowanie amplitudy
-    ampli_val = max(abs(y));
-    
-    % Znajdowanie fazy
-    [~, idx_u] = max(u); % Szukamy maksimum sygnału wejściowego
-    [~, idx_y] = max(y); % Szukamy maksimum sygnału wyjściowego
-    phase_shift = (t(idx_y) - t(idx_u)) * omega0;
-    phi_val = mod(phase_shift, 2*pi);
-    
-    % Zapisanie wyników
-    ampli = [ampli ampli_val];
-    phi = [phi phi_val];
+    u = sin(omega0 * t);%wejscie
+    y = lsim(G1, u, t);%wyjscie
+
+    figure;
+    plot(t, u, 'b', t, y, 'r');%przebieg
+    title(['\omega = ' num2str(omega0)]);
+    legend('u(t)', 'y(t)');
+    xlabel('t[s]');
+    grid on;
 end
 
-% Obliczanie składowych rzeczywistej i urojonej
-xArr = ampli .* cos(phi);
-yArr = ampli .* sin(phi);
+Am = [3.02476,2.22121,1.74359,1.21575,0.690483]; %amplituda
+phi = [(-0.8)*1,(-0.55)*2,(-0.41)*3,(-0.27)*5,(-0.14)*10];%t_x-t_y*omega
 
-% Rysowanie wykresów
+xArr = Am .* cos(phi);%obliczenie x
+yArr = Am.* sin(phi);%obliczenie y
+
+
 figure;
 plot(xArr, yArr, 'o-');
-xlim([-3,3]);
-ylim([-3,3]);
-xlabel('Re');
-ylabel('Im');
-grid on;
+nyquist(G1);
+xlim([-4, 4]);
+ylim([-3, 3]);
+
 
 hold on;
 plot(xArr, yArr, 'ro-'); % Nałożenie wartości ręcznych
 hold off;
-grid on;
+
